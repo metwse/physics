@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width">
+    
+    <title>Fizik Denemeleri</title>
+
+    <link rel="stylesheet" href="/css/index.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap">
+    
+    <script src="/js/index.js" defer></script>
+</head>
+<body>
+    <header>
+        <h1>
+            <span>fizik</span>
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"></path>
+            </svg>
+        </h1>
+        <div class="toolbar">
+            <select class="select" aria-label="simülasyon seç">
+            </select>
+            <button class="reload">
+                <svg style="rotate: 60deg" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+            </button>
+            <button class="debug">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M2 12.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5zm0-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5z"/>
+                </svg>
+            </button>
+            <button class="tools">
+                <svg fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21.731 2.269a2.625 2.625 0 00-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 000-3.712zM19.513 8.199l-3.712-3.712-12.15 12.15a5.25 5.25 0 00-1.32 2.214l-.8 2.685a.75.75 0 00.933.933l2.685-.8a5.25 5.25 0 002.214-1.32L19.513 8.2z"></path>
+                </svg>
+            </button>
+        </div>
+        <a class="link-metw" href="https://www.metw.cc" target="_blank">
+            <svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+                <path fill="currentColor" d="M275,66.56V255.1c0,.85-.96,1.28-1.6,.85l-50.09-34.77c-.32-.11-.43-.43-.43-.85v-85.28c0-.43-.53-.64-.85-.32l-71.46,60.93c-.32,.32-.96,.32-1.28,0l-71.46-60.93c-.32-.32-.85-.11-.85,.32v85.18c0,.32-.11,.53-.43,.85l-49.98,34.77c-.74,.53-1.6,0-1.6-.85V66.56c0-.32,.11-.53,.32-.85l24.99-21.59c.32-.32,.96-.32,1.28,0l97.62,83.05c.32,.32,.96,.32,1.28,0L248.1,44.23c.32-.32,.96-.32,1.28,0l24.99,21.59c.53,.11,.64,.43,.64,.74h0Z"></path>
+            </svg>
+        </a>
+    </header>
+    <main>
+        <div id="debug"></div>
+        <canvas width="800" height="600"></canvas>
+        <div id="tools"></div>
+    </main>
+</body>

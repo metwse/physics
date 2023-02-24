@@ -9,7 +9,7 @@ var w2, iframe
 
 const cache = {}
 const template = d.querySelector('template.simulation')
-const loading =  d.getElementById('loading')
+const loading = d.getElementById('loading')
 
 
 

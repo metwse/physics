@@ -9,7 +9,7 @@ var toRadians = n => n * Math.PI / 180
 var toDegrees = n => n * 180 / Math.PI
 
 var vectorInfo = (x, y, name, value, angle) => {
-    c = ctx
+    var c = ctx
 	c.font = '20px  monospace'
 	c.fillStyle = 'white'
 	c.fillText(`${name}=${value?.toFixed ? value.toFixed(2) : value}`, x, y)
@@ -44,7 +44,7 @@ class Vector {
 		if (!options?.details) return
 		vectorInfo(this.x, this.y + 48, 'a', ...resultant(...this.acc))
 		vectorInfo(this.x, this.y + 72, 'v', ...resultant(...this.vel))
-		vectorInfo(this.x, this.y + 96, 'h', c.canvas.height - this.y - 200)
+		vectorInfo(this.x, this.y + 96, 'h', c.canvas.height - this.y - 100)
 		if (this.m != 1) vectorInfo(this.x, this.y + 120, 'm', this.m)
 	}
 	update(dt){

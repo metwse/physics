@@ -1,6 +1,6 @@
 const simulations = [
     ['Yeşil Kare', '/simulations/test.html'],
-    ['Newton 1', '/simulations/physics_v1-0-0.html']
+    ['Newton 1', '/simulations/physics-v1.html']
 ]
 
 const d = document, w = window

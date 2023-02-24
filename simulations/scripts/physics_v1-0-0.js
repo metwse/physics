@@ -8,7 +8,8 @@ var resultant = (a, b) => [Math.sqrt(a ** 2 + b ** 2), Math.atan(b / a) + (Math.
 var toRadians = n => n * Math.PI / 180
 var toDegrees = n => n * 180 / Math.PI
 
-var vectorInfo = (x, y, name, value, angle, c = ctx) => {
+var vectorInfo = (x, y, name, value, angle) => {
+    c = ctx
 	c.font = '20px  monospace'
 	c.fillStyle = 'white'
 	c.fillText(`${name}=${value?.toFixed ? value.toFixed(2) : value}`, x, y)

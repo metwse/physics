@@ -1,16 +1,19 @@
 :root {
     --color: white;
-    --bg-header: #0E0F19;
-    --bg-body: #14151F;
-    --bg-pane: #191921;
+    --bg-header: #CC0735;
+    --bg-body: #212121;
+    --bg-pane: #212121;
+    --bg-pane-title: #412124;
 
-    --bd-canvas: #222432;
+    --bd-pane: #412124;
+    --bd-canvas: #412124;
 }
 
 * { box-sizing: border-box; color: inherit; font-size: inherit; font-family: inherit; -webkit-tap-highlight-color: transparent }
 
 
-button:hover { cursor: pointer }
+button { border: none }
+button:hover { cursor: pointer; filter: brightness(1.2) }
 
 
 body { display: flex; margin: 0; width: 100vw; height: 100vh; background: var(--bg-body); color: var(--color); font-family: rubik, sans-serif; flex-direction: column }
@@ -25,20 +28,25 @@ header h1:hover { border-bottom: 1px solid #F5B862; filter: brightness(1) }
 header .link-metw { padding: .2em; height: 100%; aspect-ratio: 1 }
 
 header .toolbar { display: flex; background: inherit; gap: .75em } 
-header .toolbar select { padding: .5em 1em .5em .5em; width: 100%; height: 2em; background: inherit; border: none; border-radius: .5em; filter: brightness(1.3) }
-header .toolbar button { padding: .5em; width: 2em; height: 2em; flex-shrink: 0; position: relative; background: inherit; border: none; border-radius: .5em; filter: brightness(1.3) }
-header .toolbar button:hover { filter: brightness(1.5) }
-header .toolbar button.active::before { display: block; content: ''; width: .2em; height: .2em; position: absolute; right: .3em; bottom: .3em; background: red }
+header .toolbar select { padding: .5em 1em .5em .5em; width: 100%; height: 2em; background: inherit; border: none; border-radius: .5em; filter: brightness(1.1) }
+header .toolbar button { padding: .5em; width: 2em; height: 2em; flex-shrink: 0; position: relative; background: inherit; border: none; border-radius: .5em; filter: brightness(1.1) }
+header .toolbar button:hover { filter: brightness(1.2) }
+header .toolbar button.active::before { display: block; content: ''; width: .2em; height: .2em; position: absolute; right: .3em; bottom: .3em; background: black }
 
 
 main { display: flex; max-width: 100vw; position: relative; flex-grow: 1; justify-content: center; align-items: center; gap: 1em; overflow: hidden }
 
-canvas { max-width: calc(100vw - 1em); max-height: calc(100% - 1em); flex-shrink: 1; border: .2em solid var(--bd-canvas); border-radius: .25em }
-#debug, #tools { width: 15em; position: absolute; background: var(--bg-pane); height: 100%; transition: .1s }
-#debug { left: -15em }
+canvas { max-width: calc(100vw - 1em); max-height: calc(100% - 1em); flex-shrink: 1; border: .1em solid var(--bd-canvas); border-radius: .25em }
+.pane { width: 15em; position: absolute; background: var(--bg-pane); height: 100%; transition: .1s }
+.pane > .title { display: flex; padding: .5em 1em; background: var(--bg-pane-title); justify-content: space-between; align-items: center }
+.pane > .title h2 { margin: 0; font-weight: normal; text-transform: uppercase }
+.pane > .title .close { aspect-ratio: 1; background: inherit; border-radius: .25em }
+
+#debug { left: -16em; border-right: .1em solid var(--bd-pane) }
 #debug.active { left: 0 }
-#tools { right: -15em }
+#tools { right: -16em; border-left: .1em solid var(--bd-pane) }
 #tools.active { right: 0 }
+
 
 @media (min-width: 1400px) {
     #debug, #tools { display: none; position: unset }

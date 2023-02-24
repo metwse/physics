@@ -24,6 +24,7 @@
         </h1>
         <div class="toolbar">
             <select class="select" aria-label="simülasyon seç">
+                <option class="placeholder">SEÇİNİZ</option>
             </select>
             <button class="reload">
                 <svg style="rotate: 60deg" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 16 16">
@@ -49,8 +50,20 @@
         </a>
     </header>
     <main>
-        <div id="debug"></div>
+        <div id="debug" class="pane">
+            <div class="title">
+                <h2>Hata Ayıkla</h2>
+                <button class="close">✕</button>
+            </div>
+            <div class="wrapper"></div>
+        </div>
         <canvas width="800" height="600"></canvas>
-        <div id="tools"></div>
+        <div id="tools" class="pane">
+            <div class="title">
+                <h2>Araçlar</h2>
+                <button class="close">✕</button>
+            </div>
+            <div class="wrapper"></div>
+        </div>
     </main>
 </body>

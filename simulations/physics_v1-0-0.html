@@ -4,11 +4,93 @@
 
 
 <tools>
-    123    
+    <style>
+        .root { padding: 1em }
+    </style>
+    <button class="next" onclick="w2.next()">sonraki simülasyon</button>
 </tools>
 
 
 <script>
-    var vector = new e.Vector(100, 100, ctx, 'a', 1)
-    vector.draw()
+    draw = () => {
+        var dt = (performance.now() - oldTime) / 1000; oldTime = performance.now()
+        time += dt
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        ctx.beginPath()
+        ctx.moveTo(0, 500)
+        ctx.lineTo(800, 500)
+        ctx.stroke()
+        ctx.closePath()
+
+        vectors.forEach(v => { 
+            v.draw(null, { radius: 5, details: true })
+            v.update(dt)
+            if (time > 5 && animations.no == 3) v.freze = true
+            if ([5, 6].includes(animations.no)) {
+                if (v.x < 0) v.vel[0] = Math.abs(v.vel[0])
+                if (v.x > 800) v.vel[0] = Math.abs(v.vel[0]) * -1
+                if (v.y < 0) v.vel[1] = Math.abs(v.vel[1])
+                if (v.y > 500) v.vel[1] = Math.abs(v.vel[1]) * -1
+            }
+            else if (v.y > 500) v.freze = true
+        })
+
+        requestAnimationFrame(draw)
+    }
+    
+
+    animations = [
+        () => {
+            vectors = [new e.Vector(160, 200, c, 'K'), new e.Vector(320, 200, c, 'L'), new e.Vector(480, 200, c, 'M'), new e.Vector(640, 200, c, 'N')]
+            vectors.forEach(v => (v.forces = [[10, -Math.PI / 2]]))
+            vectors[0].vel = [-20, 34.64]
+            vectors[1].vel = [0, 40]
+            vectors[2].vel = [0, -40]
+            vectors[3].vel = [5, -39.56]
+        },
+        () => {
+            vectors = [new e.Vector(160, 500, c, 'K'), new e.Vector(160, 500, c, 'M')]
+            vectors.forEach(v => (v.forces = [[10, -Math.PI / 2]]))
+            vectors[0].vel = [24, -100]
+            vectors[1].vel = [100, -24]
+        },
+        () => {
+            vectors = [new e.Vector(233, 100, c, 'K', 2), new e.Vector(577, 100, c, 'M', 4)]
+            vectors.forEach(v => (v.forces = [[v.m * 10, -Math.PI / 2]]))
+        },
+        () => {
+            vectors = [new e.Vector(10, 300, c, 'K'), new e.Vector(310, 300, c, 'L')]
+            vectors[0].vel = [200, 0], vectors[1].vel = [80, 0]
+            vectors[0].forces = [[24, 0]]
+        },
+        () => {
+            vectors = [new e.Vector(160, 500, c, 'K')]
+            vectors[0].vel = [60, -40]
+            vectors.forEach(v => (v.forces = [[10, -Math.PI / 2]]))
+        },
+        () => { 
+            vectors = [new e.Vector(400, 400, c, 'K')]
+            vectors[0].vel = [Math.random() * 200 - 100, Math.random() * 200 - 100]
+            vectors.forEach(v => (v.forces = [[10, -Math.PI / 2]]))
+        },
+        () => { 
+            vectors = [new e.Vector(400, 400, c, 'K')]
+            vectors[0].vel = [Math.random() * 200 - 100, Math.random() * 200 - 100]
+        }
+    ]
+
+    animations.no = 0
+    c = ctx
+    start = () => {
+        time = 0
+        startTime = oldTime = performance.now()
+        animations.no = animations.no % animations.length
+        animations[animations.no]()
+        draw(frame)
+    }
+
+    next = () => { animations.no++; start() }
+
+    start()
 </script>

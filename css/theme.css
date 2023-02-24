@@ -1,0 +1,10 @@
+:root {
+    --color: white;
+    --bg-header: #CC0735;
+    --bg-body: #212121;
+    --bg-pane: #212121;
+    --bg-pane-title: #412124;
+
+    --bd-pane: #412124;
+    --bd-canvas: #412124;
+}

@@ -109,7 +109,7 @@ const app = {
         if (this.random != random) return
 
         loading.style.display = ''
-        w2.eval(elem.querySelector('script:not([requirements])')?.innerText ?? '')
+        w2.eval(Array.from(elem.querySelectorAll('script:not([requirements])')).map(v => v.innerText).join(';') ?? '')
     }
 }
 

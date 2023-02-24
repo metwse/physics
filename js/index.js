@@ -72,7 +72,14 @@ const app = {
         for (let [i, v] of ['head', 'body'].entries()) w2.d[v].innerHTML = template.content.children[i].innerHTML
     
         //TO DO:: improve perf
-        await new Promise(res => w2.onload = res)
+        await new Promise(res => {
+            w2.onload = res 
+            var timeouter = () => setTimeout(() => {
+                if (w2.d.readyState == 'complete') res()
+                else timeouter()
+            }, 10)
+            timeouter()
+        })
         /* onload */ w2.canvas = w2.d.querySelector('canvas')
         /* onload */ w2.ctx = w2.canvas.getContext('2d')
 

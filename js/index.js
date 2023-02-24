@@ -63,7 +63,7 @@ const app = {
 
         !['tools', 'debug'].forEach(v => { 
             var html = elem.querySelector(v)?.innerHTML ?? false
-            header[v].style.display = w[v].style.display = html ? 'unset' : 'none'
+            header[v].style.display = w[v].style.display = html ? '' : 'none'
             w[v].root.innerHTML = html ? `<div class="root">${html}</div>` : '' 
         })
 

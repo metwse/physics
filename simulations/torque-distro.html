@@ -1,0 +1,199 @@
+<tools>
+    <style>
+        .root { display: flex !important; padding: 1em; flex-direction: column; gap: 1em }
+        .root > div { display: flex; justify-items: center; gap: 1em }
+    </style>
+
+    <div>
+        <span>α:</span>
+        <input type="range" min="0" max="180" value="140" oninput="event.target.parentNode.querySelector('.value').innerHTML = +event.target.value; a = +event.target.value * Math.PI / 180">
+        <span class="value">140</span>
+    </div>
+
+    <div>
+        <span>d₁:</span>
+        <input type="range" min="0" max="20" value="10" oninput="event.target.parentNode.querySelector('.value').innerHTML = d[0] = +event.target.value">
+        <span class="value">10</span>
+    </div>
+
+    <div>
+        <span>d₂:</span>
+        <input type="range" min="0" max="20" value="10" oninput="event.target.parentNode.querySelector('.value').innerHTML = d[1] = +event.target.value">
+        <span class="value">10</span>
+    </div>
+
+    <div>
+        <span>F₁:</span>
+        <input type="range" min="0" max="20" value="10" oninput="event.target.parentNode.querySelector('.value').innerHTML = F[0] = +event.target.value">
+        <span class="value">10</span>
+    </div>
+
+    <div>
+        <span>F₂:</span>
+        <input type="range" min="0" max="20" value="10" oninput="event.target.parentNode.querySelector('.value').innerHTML = F[1] = +event.target.value">
+        <span class="value">10</span>
+    </div>
+</tools>
+
+
+
+<script>
+    F = [10, 10]
+    d = [10, 10]
+    a = Math.PI * 7 / 9
+    n = 0
+
+    scale = 1.5
+    translate = [400, 300]
+    joins = [[5, 5], [-5, 5], [-5, -5], [5, -5]]
+    distance = ([a, b], [c, d]) => Math.sqrt((a - c) ** 2 + (b - d) ** 2)
+
+    function line([a, b], [c, d]) {
+        ctx.beginPath()
+        ctx.moveTo(a, b)
+        ctx.lineTo(c, d)
+        ctx.stroke()
+        ctx.closePath()
+    }
+
+    var vectorInfo = (x, y, name, matrix) => {
+        let angle = Math.atan2(matrix[1], matrix[0]), value = distance([0, 0], matrix)
+        ctx.font = '20px  monospace'
+        ctx.fillStyle = 'white'
+        ctx.fillText(`${name} = ${value?.toFixed ? value.toFixed(2) : value}`, x, y)
+        if (angle === undefined) return
+        ctx.strokeStyle = 'white'
+        ctx.beginPath()
+        ctx.arc(x - 16, y - 5, 10, 0, 360)
+        ctx.stroke(), ctx.closePath()
+        ctx.beginPath()
+        ctx.moveTo(x - 16, y - 5)
+        ctx.lineTo(x - 16 + Math.cos(angle) * 10, y - 5 + Math.sin(angle) * 10)
+        ctx.stroke(), ctx.closePath()
+    }
+
+    function arrow([a, b], [c, d], label, l = 20, angle = 30) {
+        line([a, b], [c, d])
+        var ma = Math.atan2(b - d, a - c), ta = angle * Math.PI / 180
+        line([a, b], [a - Math.cos(ma + ta) * l, b - Math.sin(ma + ta) * l])
+        line([a, b], [a - Math.cos(ma - ta) * l, b - Math.sin(ma - ta) * l])
+        ctx.fillText(label, c, d)
+    }
+
+    function draw() {
+        ctx.resetTransform()
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.translate(...translate)
+        ctx.scale(scale, scale)
+
+        with (Math) {
+            ctx.lineWidth = 10
+            ctx.strokeStyle = 'white'
+            ctx.fillStyle = 'white'
+            ctx.font = '16px monospace'
+            var x, y, x1, y1, x2, y2
+
+            // lines
+            x = cos((PI - a) / 2), y = -sin((PI - a) / 2)
+            x1 = x * d[0] * 10, y1 = y * d[0] * 10
+            x2 = -x * d[1] * 10, y2 = y * d[1] * 10
+
+            line([-x * 20, -y * 20], [x1 + x * 10, y1 + y * 10])
+            line([x * 20, -y * 20], [x2 - x * 10, y2 + y * 10])
+
+            ctx.lineWidth = 2
+            ctx.strokeStyle = 'red'
+            ctx.fillStyle = 'red'
+
+            // angle
+            ctx.beginPath()
+            ctx.arc(0, 0, 20, PI * 1.5 - a / 2, PI * 1.5 + a / 2)
+            ctx.stroke()
+            ctx.closePath()
+            ctx.fillText(`α = ${floor(a / PI * 180)}`, 0, -30)
+
+            // forces
+            arrow([x2, y2], [x2 + sin((PI - a) / -2) * F[1] * 5, y2 + cos((PI - a) / 2) * F[1] * 5], `F₂ = ${F[1]}N`, F[1])
+            arrow([x1, y1], [x1 + sin((PI - a) / 2) * F[0] * 5, y1 + cos((PI - a) / 2) * F[0] * 5], `F₁ = ${F[0]}N`, F[0])
+
+            ctx.font = '2px monospace'
+            ctx.lineWidth = 0.1
+            for (let [i, [x3, y3]] of joins.entries()) {
+                let x4 = x * x3, y4 = y * y3
+                ctx.beginPath()
+                ctx.arc(x4, y4, 2, 0, PI * 2)
+                joins[i].p = [x4, y4]
+                ctx.fill()
+                let distances = [distance([x4, y4], [x1, y1]) / 10, distance([x4, y4], [x2, y2]) / 10]
+                ctx.fillText(distances[0].toFixed(2), x4, y4 - 2)
+                ctx.fillText(distances[1].toFixed(2), x4, y4 + 3.5)
+                line([x1, y1], [x1 + sin((PI - a) / 2) * F[0] * 5, y1])
+                line([x1, y1], [x1, y1 + cos((PI - a) / 2) * F[0] * 5])
+                line([x2, y2], [x2 - sin((PI - a) / 2) * F[0] * 5, y2])
+                line([x2, y2], [x2, y2 + cos((PI - a) / 2) * F[0] * 5])
+                ctx.fillText((cos((PI - a) / 2) * F[0]).toFixed(2) + 'N', x1, y1 + cos((PI - a) / 2) * F[0] * 5)
+                joins[i].t = [
+                    [(y1 - y4) * sin((PI - a) / 2) * F[0] / 10, (x1 - x4) * -cos((PI - a) / 2) * F[0] / 10],
+                    [(y2 - y4) * -sin((PI - a) / 2) * F[0] / 10, (x2 - x4) * cos((PI - a) / 2) * F[0] / 10]
+                ]
+            }
+
+            ctx.resetTransform()
+            vectorInfo(570, 48, 'F₁ τ ▙', joins[0]?.t[0])
+            vectorInfo(570, 72, 'F₁ τ ▟', joins[1]?.t[0])
+            vectorInfo(570, 96, 'F₁ τ ▜', joins[2]?.t[0])
+            vectorInfo(570, 120, 'F₁ τ ▛', joins[3]?.t[0])
+            vectorInfo(100, 48, 'F₂ τ ▙', joins[0]?.t[1])
+            vectorInfo(100, 72, 'F₂ τ ▟', joins[1]?.t[1])
+            vectorInfo(100, 96, 'F₂ τ ▜', joins[2]?.t[1])
+            vectorInfo(100, 120, 'F₂ τ ▛', joins[3]?.t[1])
+
+            for (let join of joins) { join.t = [join.t[0][0] + join.t[1][0], join.t[0][1] + join.t[1][1]]; join.N = [0, 0] }
+            
+            vectorInfo(570, 448, 'τ ▙', joins[0]?.t)
+            vectorInfo(570, 472, 'τ ▟', joins[1]?.t)
+            vectorInfo(570, 496, 'τ ▜', joins[2]?.t)
+            vectorInfo(570, 520, 'τ ▛', joins[3]?.t)
+
+            let js = joins.length - 1
+            for (let j of joins) {
+                j.disto = joins.map(v => [j.p[0] - v.p[0], j.p[1] - v.p[1]])
+                j.distot = [0, 1].map(v => j.disto.map(a => a[v]).reduce((a, b) => Math.abs(a) + Math.abs(b)))
+                for (let o of joins) {
+                    if (o != j) {
+                        if (j.p[0] - o.p[0] > 0.00000000000001) j.N[0] += o.t[0] / j.distot[0]
+                        if (j.p[1] - o.p[1] > 0.00000000000001) j.N[1] += o.t[1] / j.distot[1]
+                    }
+                }
+            }
+
+            vectorInfo(100, 448, 'N ▙', joins[0]?.N)
+            vectorInfo(100, 472, 'N ▟', joins[1]?.N)
+            vectorInfo(100, 496, 'N ▜', joins[2]?.N)
+            vectorInfo(100, 520, 'N ▛', joins[3]?.N)
+            
+            frame(draw)    
+        }
+    }
+
+    draw()
+    
+    var mouse = false
+    onmousedown = () => mouse = true 
+    onmouseup = () => mouse = false
+    canvas.onmousemove = e => {
+        if (!mouse) return 
+        translate[0] += e.movementX
+        translate[1] += e.movementY
+    }
+    canvas.onmousewheel = ({ deltaY, screenX, screenY, target }) => {
+        if (scale < .75 && deltaY > 0) return
+        let t = scale
+        scale -= deltaY / 960
+        translate[0] *= scale / t
+        translate[1] *= scale / t
+        translate[0] += (screenX - target.offsetLeft) * 2 / (scale + t) * -(scale - t)
+        translate[1] += (screenY - target.offsetTop) * 2 / (scale + t) * -(scale - t)
+        
+    }
+</script>

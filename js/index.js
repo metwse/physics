@@ -1,5 +1,5 @@
 const simulations = [
-    ['Yeşil Kare', '/simulations/test.html'],
+    ['Tork Dağılımı - Başarısız', '/simulations/torque-distro.html'],
     ['Newton 1', '/simulations/physics-v1.html']
 ]
 
@@ -34,6 +34,7 @@ for (let [i, simulation] of simulations.entries()) {
 header.select.oninput = ({ target: { value } }) => { 
     if (header.select.children[0].className == 'placeholder') header.select.children[0].remove()
     app.loadURL(simulations[value][1])
+    history.replaceState(null, null, `/${value}`)
 }
 //}}}
 
@@ -70,7 +71,8 @@ const app = {
         w2.console = console, w2.frame = w2.requestAnimationFrame = this.requestAnimationFrameFunction(random)
 
         for (let [i, v] of ['head', 'body'].entries()) w2.d[v].innerHTML = template.content.children[i].innerHTML
-    
+        w2.addEventListener('keypress', onkeypress)
+
         //TO DO:: improve perf
         await new Promise(res => {
             w2.onload = res 
@@ -92,7 +94,7 @@ const app = {
             header[v].style.display = w2[v].style.display = html ? '' : 'none'
 
             w2[v].root = w2[v].querySelector('.wrapper').attachShadow({ mode: 'open' })
-            w2[v].root.innerHTML = html ? `<div class="root">${html}</div>` : ''
+            w2[v].root.innerHTML = html ? `<div-${v} class="root r" style="display: block">${html}</div-${v}>` : ''
             w2[v] = w2[v].children[0]
         })
         
@@ -118,4 +120,19 @@ const app = {
 
 onload = () => {
     iframe = d.querySelector('iframe')
+    var id = location.pathname.slice(1)
+    //TO DO:: better loading
+    if (simulations[id]?.[1]) {
+        header.select.value = id
+        header.select.children[0].remove()
+        app.loadURL(simulations[id][1])
+    }
+}
+
+onkeypress = e => {
+    if (!e.ctrlKey) return
+    switch (e.key) {
+        case 'q': header.tools.onclick(); break
+        case 'z': header.debug.onclick(); break
+    }
 }

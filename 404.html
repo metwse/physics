@@ -1,0 +1,7 @@
+<meta charset="utf-8">
+<title>fizik</title>
+<script type="text/javascript">
+    //credits going to @rafgraph
+    var pathSegmentsToKeep = 0, l = window.location;
+    l.replace(l.origin + l.pathname.split("/").slice(0, 1 + pathSegmentsToKeep).join("/") + "/?/" + l.pathname.slice(1).split("/").slice(pathSegmentsToKeep).join("/") + (l.search ? "&" + l.search.slice(1) : "") + l.hash);
+</script>

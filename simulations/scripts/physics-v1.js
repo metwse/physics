@@ -111,4 +111,4 @@ class Polygon{
 	}
 }
 
-var exports = { Vector }
+exports = { Vector }

@@ -1,0 +1,37 @@
+<script requirements>
+    Engine: '/simulations/scripts/electric.js'
+    controls: '/simulations/scripts/ctx-controls.js'
+</script>
+
+
+<script>
+    controls(ctx)
+
+    e = new Engine({ ctx })
+
+    e.newWall([canvas.width, 0], [canvas.width, canvas.height])
+    e.newWall([0, canvas.height], [canvas.width, canvas.height])
+    e.newWall([0, 0], [canvas.width, 0])
+    e.newWall([0, canvas.height], [0, 0])
+
+    v = e.newVector({ x: 400, y: 250, q: -5e-4 })
+    v = e.newVector({ x: 400, y: 150, q: 1e-2, anchored: true })
+    v = e.newVector({ x: 425, y: 300, rotatable: true, r: 150, q: 1e-1 })
+    v = e.newVector({ x: 375, y: 300, rotatable: true, r: 300, q: 1e-1, angle: Math.PI })
+
+    var oldTime = performance.now()
+    function draw() {
+        ctx.resetTransform()
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+        ctx.translate(ctx.controls.x, ctx.controls.y)
+        ctx.scale(ctx.controls.scale, ctx.controls.scale)
+        e.draw()
+        requestAnimationFrame(draw)
+    }
+    setInterval(() => {
+        const dt = (performance.now() - oldTime) / 1000
+        oldTime = performance.now()
+        e.update(dt)
+    })
+    draw()
+</script>

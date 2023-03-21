@@ -1,0 +1,28 @@
+<script requirements>
+    Mathp: '/simulations/scripts/mathp.js'
+    Engine: '/simulations/scripts/physics-v4.js'
+</script>
+
+
+
+
+<script>
+    e = new Engine()
+
+    function draw() {
+        e.draw()
+        
+        frame(draw)
+    }
+
+    v1 = e.Vector(100, 100, { m: 1 })
+    v2 = e.Vector(400, 100, { m: 1 })
+    v1.addForce([0, 10], 10, 0)
+    v2.addForce([0, 10], 10, 0)
+    j1 = e.joint(0, 1, 50, 0)
+    e.joint(0, 1, 150, 0)
+    e.joint(0, 1, 250, 0)
+    j1.addForce([0, 10], 10, 0)
+
+    draw()
+</script>

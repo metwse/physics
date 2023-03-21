@@ -1,6 +1,8 @@
 const simulations = [
+    ['Tork-Newton', '/simulations/torque-newton.html'],
     ['Tork Dağılımı - Başarısız', '/simulations/torque-distro.html'],
-    ['Newton 1', '/simulations/physics-v1.html']
+    ['Newton 1', '/simulations/physics-v1.html'],
+    ['Elektrik', '/simulations/electric.html']
 ]
 
 
@@ -99,10 +101,10 @@ const app = {
         })
         
         await Promise.all(
-            Object.entries(eval(`() => { var v = {${elem.querySelector('script[requirements]')?.innerText ?? ''}}; return v }`)()).map(async ([key, value]) => {
+            Object.entries(eval(`() => { var v = {${(elem.querySelector('script[requirements]')?.innerText ?? '').split('\n').filter(v => v).join(',')}}; return v }`)()).map(async ([key, value]) => {
                 var script = cache[value]; if (!script) script = cache[value] = await fetch(value).then(r => r.text())
                 if (this.random == random) { 
-                    w2.eval(`window['${key.replace(/'/g, '\'')}'] = (() => { ${script}; if (typeof exports == 'undefined') var exports = undefined; return exports })()`)
+                    w2.eval(`window['${key.replace(/'/g, '\'')}'] = (() => { var exports; ${script}; return exports })()`)
                     //TO DO:: better loading screen
                 }
                 return

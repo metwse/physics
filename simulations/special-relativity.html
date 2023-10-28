@@ -2,27 +2,129 @@
     Engine: '/simulations/scripts/special-relativity.js'
 </script>
 
+<tools>
+    <style>
+        .root { 
+            display: flex;
+            gap: 1.5em; padding: 1em; max-height: calc(100% - 2em);
+            flex-direction: column;
+            overflow: auto
+        }
+
+        h2 { margin: 0; font-weight: normal }
+
+        .r > div > * { margin: 0 0 .5em }
+        .r > div > div { display: flex; gap: .25em; align-items: center }
+
+        .vectors .list { display: flex; gap: .5em; flex-direction: column }
+        .vector { display: flex; flex-direction: column }
+        .vectors hr { margin: 0; width: 100%; opacity: .5 }
+    </style>
+
+
+    <div class="reference">
+        <h2>referans</h2>
+        <select class="select" aria-label="referans noktası"></select>
+        <button onclick="e.vectors.forEach(v => v.t = v.ts = 0)">sıfırla</button>
+        <div>hız: <input type="range" min="0" value="100" max="400" oninput="speed = event.target.value / 100"></div>
+    </div>
+
+
+    <div class="vectors">
+        <h2>vektörler</h2>
+        <div class="list">
+            <div class="vector">
+                <div>t: 0</div>
+                <div>renk: <input type="color" value="#ff0000"></div>
+                <textarea></textarea>
+            </div>
+        </div>
+        <button onclick="newVectorLi()">yeni</button>
+    </div>
+</tools>
 
 <script>
     e = new Engine({ timeInterval: 20, length: 1600 })
+
+    tools.vectors = tools.querySelector('.vectors')
+    tools.vectors.list = tools.vectors.querySelector('.list')
+    loadVectors([
+        { color: '#cf3017', x: t => -t / 3 },
+        { color: '#2617cf', x: t => 
+            t < 50 ? 0 : 
+            t < 350 ? (t - 50) ** 2 * (t - 350) ** 2 / 7000000 : 0
+        },
+        { color: '#ff8800', x: t => -t },
+        { color: '#ff8800', x: t => t },
+        { color: '#20cf17', x: t => e.vectors[0].x(t) + Math.cos(t / 80) * 40 }
+    ])
+
+    function newVectorLi() {
+        const vector = e.newVector({ x: t => 0 })
+        vectorLi(vector)
+        if (!e.reference) e.reference = vector
+    }
+
+    function vectorLi(v) {
+        const i = d.createElement('div')
+        i.innerHTML = `
+                <div>t: <span class="t">0</span>s</div>
+                <div>v: <span class="v">0</span>c</div>
+                <div>renk: <input class="color" type="color" value="${v.color}"></div>
+                <textarea></textarea>
+                <div><button class="delete">sil</button> <button class="save">kaydet</button></div>
+                `
+        i.querySelector('textarea').innerHTML = v.xFuncionString
+        v.label = { ts: i.querySelector('.t'), v: i.querySelector('.v') }
+        i.querySelector('.delete').onclick = () => { 
+            const update = v == e.reference
+            i.remove(), e.removeVector(v)
+            if (update) e.reference = e.vectors[0]
+        }
+        i.querySelector('.save').onclick = () => { 
+            try {
+                const f = eval(i.querySelector('textarea').value)
+                f(1)
+                v.xFunction(f)
+            } catch (e) { alert(e) }
+        }
+        i.querySelector('.color').oninput = ({ target: { value } }) => v.color = value
+        tools.vectors.list.appendChild(i)
+    }
+     
+    function loadVectors(list) {
+        tools.vectors.list.innerHTML = ''
+        list.forEach(v => { 
+            const vector = e.newVector(v) 
+            vectorLi(vector)
+        })
+        e.reference = e.vectors?.[0]
+    }
+
+    tools.reference = tools.querySelector('.reference')
+    tools.reference.select = tools.reference.querySelector('select')
+    tools.reference.select.oninput = () => (e.reference = e.vectors[tools.reference.select.value])
+    e.onvectorupdate = () => {
+        tools.reference.select.innerHTML = ''
+        e.vectors.forEach((v, i) => {
+            const o = d.createElement('option')
+            o.innerHTML = `${i}: ${v.color}`
+            o.value = i
+            tools.reference.select.appendChild(o)
+        })
+    }
+    e.onvectorupdate()
+
+
+
+    speed = 1
     function run(t) {
-        const dt = t - oldt
+        const dt = (t - oldt) * speed
         oldt = t
+        e.vectors.forEach(v => Object.entries(v.label).forEach(([e, i]) => i.innerHTML = (typeof v[e] == 'function' ? v[e]() : v[e]).toFixed(2)))
         try { if (e.length >= e.reference.t) e.update(dt), e.draw() } catch { }
         requestAnimationFrame(run)
     }
     var oldt = performance.now()
-    ![
-        { color: 'green', x: t => e.vectors[1].x(t) + Math.cos(t / 80) * 40 },
-        { color: 'red', x: t => -t / 3 },
-        { color: 'blue', x: t => 
-            t < 50 ? 0 : 
-            t < 350 ? (t - 50) ** 2 * (t - 350) ** 2 / 7000000 : 0
-        },
-        { color: 'transparent', x: t => 0 },
-        { color: 'orange', x: t => -t },
-        { color: 'orange', x: t => t }
-    ].forEach(v => e.newVector(v))
-    e.reference = e.vectors[0]
     requestAnimationFrame(run)
 </script>

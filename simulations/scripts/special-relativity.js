@@ -18,13 +18,24 @@ class Engine {
     }
 
     newVector(o) {
-        return this.vectors.push(new Vector(o))
+        const v = new Vector(o); this.vectors.push(v)
+        this.onvectorupdate?.()
+        return v
+    }
+    removeVector(v) {
+        for (let i = 0; i < this.vectors.length; i++)
+            if (this.vectors[i] == v) { this.vectors.splice(i, 1)[0], this.onvectorupdate?.(); return }
     }
 
     update(_dt) {
         const dt = _dt / this.timeInterval
-        for (let vector of this.vectors)
-            vector.t += dt / vector.y * this.reference.y
+        for (let i = 0; i < this.vectors.length; i++) {
+            const vector = this.vectors[i]
+            const __dt = dt / vector.y * this.reference.y
+            vector.t += __dt
+            vector.ts += __dt / 1000 * this.timeInterval
+            vector.id = i
+        }
     }
 
     draw() {
@@ -34,6 +45,7 @@ class Engine {
         this.tscale = 1
         const k = 1 / Math.sqrt(pythagoras(...this.rtransform(1, 1)) * pythagoras(...this.rtransform(1, -1)))
         this.tscale = k
+        if (isNaN(this.tscale)) this.tscale = 1
 
         const xoffset = 0
 
@@ -81,33 +93,29 @@ class Engine {
             if (dot === undefined) dot = y
             c.stroke(); c.closePath()
 
-
-
             c.beginPath()
             c.arc(0, dot, 2, Math.PI, -Math.PI)
             c.fill()
-            c.fillText(isNaN(vector.t) ? '0.0' : (vector.t / 1000 * this.timeInterval).toFixed(2), 2, dot - 2)
+            c.fillText(vector.id, 2, dot - 2)
         }
-
     }
 
     transform(x, t, v) { return [(x - t * v.v()) * v.y, (t - x * v.v()) * v.y] }
 
     ttransform(t, v) { return t * v.y }
     tutransform(t, v) { return t / v.y }
-    rtransform(x, t) {
-        return [(x - t * this.reference.v()) * this.reference.y * this.tscale, (t - x * this.reference.v()) * this.reference.y * this.tscale]
-    }
+    rtransform(x, t) { return [(x - t * this.reference.v()) * this.reference.y * this.tscale, (t - x * this.reference.v()) * this.reference.y * this.tscale] }
 }
 
 class Vector {
     constructor({ x, color }) {
-        this.t = 0
-        this.x = t => x(t ?? this.t)
-        this.color = color ?? 'red'
+        this.t = 0; this.ts = 0
+        this.xFunction(x)
+        this.color = color ?? '#FF0000'
     }
     v(t, p) { const d = p ?? 1 / 8, v = (this.x((t ?? this.t) - d) - this.x((t ?? this.t) + d)) / (2 * d); return Math.abs(v) > 1 ? Math.sign(v) * 0.999 : v }
     get y() { return 1 / Math.sqrt(1 - this.v() ** 2) }
+    xFunction(x) { this.x = t => x(t ?? this.t), this.xFuncionString = x }
 }
 
 exports = Engine

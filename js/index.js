@@ -21,7 +21,7 @@ const loading = d.getElementById('loading')
 const header = Object.fromEntries(['select', 'reload', 'debug', 'tools'].map(v => [v, d.querySelector(`body > header .toolbar .${v}`)]))
 !['debug', 'tools'].forEach(v => {
     header[v].onclick = () => {
-        w2?.[v].parentNode.classList.toggle?.('active')
+        w2?.[v].frame.classList.toggle?.('active')
         header[v].classList.toggle('active')
     }
 })
@@ -87,6 +87,7 @@ const app = {
         })
         /* onload */ w2.canvas = w2.d.querySelector('canvas')
         /* onload */ w2.c = w2.ctx = w2.canvas.getContext('2d')
+        /* onload */ w2.performance = performance
 
         !['tools', 'debug'].forEach(v => { 
             let html = elem.querySelector(v)?.innerHTML ?? false
@@ -97,8 +98,9 @@ const app = {
             header[v].style.display = w2[v].style.display = html ? '' : 'none'
 
             w2[v].root = w2[v].querySelector('.wrapper').attachShadow({ mode: 'open' })
-            w2[v].root.innerHTML = html ? `<div-${v} class="root r" style="display: block">${html}</div-${v}>` : ''
-            w2[v] = w2[v].children[0]
+            w2[v].root.innerHTML = html ? `<div-${v} class="root r">${html}</div-${v}>` : ''
+            w2[v].root.frame = w2[v]
+            w2[v] = w2[v].root
         })
         
         await Promise.all(

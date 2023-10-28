@@ -183,7 +183,9 @@
             clearVectors()
             loadVectors(vectors)
             tools.reference.speed.value = (speed ?? 1) * 100
+            window.speed = speed ?? 1
             tools.reference.scale.value = (scale ?? 2) * 100
+            e.scale = scale ?? 2
             e.reference = e.vectors[reference ?? 0]
         }
         debug.demo.appendChild(i)

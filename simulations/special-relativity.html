@@ -2,6 +2,47 @@
     Engine: '/simulations/scripts/special-relativity.js'
 </script>
 
+
+
+<debug>
+    <style>
+        .root { 
+            display: flex;
+            gap: 1.5em; padding: 1em; max-height: calc(100% - 2em);
+            flex-direction: column;
+            overflow: auto
+        }
+
+        h2 { margin: 0; font-weight: normal }
+
+        .r > div > * { margin: 0 0 .5em }
+        .r > div > div { display: flex; gap: .25em; align-items: center }
+
+        input { min-width: 0; width: 100% }
+    </style>
+
+    <div class="demo">
+        <h2>demo</h2>
+    </div>
+
+    <div class="save">
+        <h2>kaydet</h2>
+        <button onclick="debug.save.generate()">yenile</button>
+        <button onclick="debug.save.copy()">kopyala</button>
+        <button onclick="debug.save.download()">indir</button>
+        <textarea></textarea>
+    </div>
+
+    <div class="load">
+        <h2>yükle</h2>
+        <input oninput="debug.load.file(event)" type="file" accept="application/json">
+        <button onclick="debug.load.load()">yükle</button>
+        <textarea></textarea>
+    </div>
+</debug>
+
+
+
 <tools>
     <style>
         .root { 
@@ -21,14 +62,13 @@
         .vectors hr { margin: 0; width: 100%; opacity: .5 }
     </style>
 
-
     <div class="reference">
         <h2>referans</h2>
         <select class="select" aria-label="referans noktası"></select>
         <button onclick="e.vectors.forEach(v => v.t = v.ts = 0)">sıfırla</button>
-        <div>hız: <input type="range" min="0" value="100" max="400" oninput="speed = event.target.value / 100"></div>
+        <div>hız: <input type="range" class="speed" min="0" value="100" max="400" oninput="speed = event.target.value / 100"></div>
+        <div>ölçek: <input type="range" class="scale" min="50" value="200" max="600" oninput="e.scale = event.target.value / 100"></div>
     </div>
-
 
     <div class="vectors">
         <h2>vektörler</h2>
@@ -39,92 +79,181 @@
                 <textarea></textarea>
             </div>
         </div>
-        <button onclick="newVectorLi()">yeni</button>
+        <button onclick="tools.vectors.list.createVector()">yeni</button>
+        <button onclick="clearVectors()">temizle</button>
     </div>
 </tools>
 
-<script>
-    e = new Engine({ timeInterval: 20, length: 1600 })
 
+
+
+
+<script>
+   demos = {
+       'durgun cismin yörüngesinde': {
+           vectors: [
+               { color: '#20cf17', x: t => e.vectors[1].x(t) + Math.cos(t / 80) * 40 },
+               { color: '#cf3017', x: t => 0 }
+           ]
+       },
+       'ışık hızına yakın cismin yörüngesinde': {
+           vectors: [
+               { color: '#20cf17', x: t => e.vectors[1].x(t) + Math.cos(t / 80) * 40 },
+               { color: '#cf3017', x: t => t / 1.3 }
+           ]
+       },
+       'durgun cismin hareketli cisme göre zamanı': {
+           vectors: [
+               { color: '#2617cf', x: t => 20 + (t < 200 ? 0 : t < 500 ? (t - 200) ** 2 * (t - 500) ** 2 / 7000000 : 0) },
+               { color: '#cf3017', x: t => -20 }
+           ]
+       },
+       'ışık hızı': {
+           vectors: [
+               { color: '#20cf17', x: t => Math.cos(t / 80) * 40 },
+               { x: t => 0 },
+               { color: '#ff8800', x: t => -t },
+               { color: '#ff8800', x: t => t }
+           ]
+       }
+   }
+
+
+    e = new Engine({ timeInterval: 20, length: 12000, scale: 2 })
+
+
+    //{{{ tools 
     tools.vectors = tools.querySelector('.vectors')
     tools.vectors.list = tools.vectors.querySelector('.list')
-    loadVectors([
-        { color: '#cf3017', x: t => -t / 3 },
-        { color: '#2617cf', x: t => 
-            t < 50 ? 0 : 
-            t < 350 ? (t - 50) ** 2 * (t - 350) ** 2 / 7000000 : 0
-        },
-        { color: '#ff8800', x: t => -t },
-        { color: '#ff8800', x: t => t },
-        { color: '#20cf17', x: t => e.vectors[0].x(t) + Math.cos(t / 80) * 40 }
-    ])
-
-    function newVectorLi() {
-        const vector = e.newVector({ x: t => 0 })
-        vectorLi(vector)
-        if (!e.reference) e.reference = vector
-    }
-
-    function vectorLi(v) {
+    tools.vectors.list.push = v => {
         const i = d.createElement('div')
         i.innerHTML = `
-                <div>t: <span class="t">0</span>s</div>
-                <div>v: <span class="v">0</span>c</div>
-                <div>renk: <input class="color" type="color" value="${v.color}"></div>
-                <textarea></textarea>
-                <div><button class="delete">sil</button> <button class="save">kaydet</button></div>
-                `
+            <div>id: <span class="id">0</span></div>
+            <div>t: <span class="ts">0</span>s</div>
+            <div>v: <span class="v">0</span>c</div>
+            <div>renk: <input class="color" type="color" value="${v.color}"></div>
+            <textarea></textarea>
+            <div><button class="delete">sil</button> <button class="save">kaydet</button></div>`
+        v.label = Object.fromEntries(['id', 'ts', 'v'].map(e => [e, i.querySelector('.' + e)]))
+
         i.querySelector('textarea').innerHTML = v.xFuncionString
-        v.label = { ts: i.querySelector('.t'), v: i.querySelector('.v') }
+
         i.querySelector('.delete').onclick = () => { 
             const update = v == e.reference
             i.remove(), e.removeVector(v)
-            if (update) e.reference = e.vectors[0]
+            update && (e.reference = e.vectors[0])
         }
-        i.querySelector('.save').onclick = () => { 
-            try {
-                const f = eval(i.querySelector('textarea').value)
-                f(1)
-                v.xFunction(f)
-            } catch (e) { alert(e) }
+        i.querySelector('.save').onclick = () => {
+            try { const f = eval(i.querySelector('textarea').value); f(1); v.xFunction(f) } 
+            catch (e) { alert(e) }
         }
         i.querySelector('.color').oninput = ({ target: { value } }) => v.color = value
         tools.vectors.list.appendChild(i)
     }
-     
-    function loadVectors(list) {
-        tools.vectors.list.innerHTML = ''
-        list.forEach(v => { 
-            const vector = e.newVector(v) 
-            vectorLi(vector)
-        })
-        e.reference = e.vectors?.[0]
+    tools.vectors.list.createVector = () => {
+        const vector = e.newVector({ x: t => 0 })
+        tools.vectors.list.push(vector)
+        if (!e.reference) e.reference = vector
     }
 
     tools.reference = tools.querySelector('.reference')
+    tools.reference.speed = tools.reference.querySelector('.speed')
+    tools.reference.scale = tools.reference.querySelector('.scale')
     tools.reference.select = tools.reference.querySelector('select')
     tools.reference.select.oninput = () => (e.reference = e.vectors[tools.reference.select.value])
     e.onvectorupdate = () => {
         tools.reference.select.innerHTML = ''
         e.vectors.forEach((v, i) => {
             const o = d.createElement('option')
-            o.innerHTML = `${i}: ${v.color}`
-            o.value = i
+            o.innerHTML = `${i}: ${v.color}`, o.value = i
             tools.reference.select.appendChild(o)
+            if (e.reference == v) tools.reference.select.value = i
         })
     }
     e.onvectorupdate()
+    //}}}
 
 
+    //{{{ debug
+    debug.demo = debug.querySelector('.demo')
+    debug.demo.push = ([name, { vectors, scale, speed, reference }]) => {
+        const i = d.createElement('div')
+        i.innerHTML = `${name} <button>yükle</button>`
+        i.querySelector('button').onclick = () => { 
+            clearVectors()
+            loadVectors(vectors)
+            tools.reference.speed.value = (speed ?? 1) * 100
+            tools.reference.scale.value = (scale ?? 2) * 100
+            e.reference = e.vectors[reference ?? 0]
+        }
+        debug.demo.appendChild(i)
+    }
+    Object.entries(demos).forEach(debug.demo.push)
+
+    debug.save = debug.querySelector('.save')
+    debug.save.textarea = debug.save.querySelector('textarea')
+    debug.save.generate = () => debug.save.value = debug.save.textarea.value = e.toString()
+    debug.save.copy = () => {
+        debug.save.generate()
+        debug.save.textarea.select()
+        debug.save.textarea.setSelectionRange(0, debug.save.value.length)
+        d.execCommand('copy')
+    }
+    debug.save.download = () => {
+        debug.save.generate()
+        const a = d.createElement('a')
+        const file = new Blob([debug.save.value], { type: 'application/octet-stream' })
+        a.href = URL.createObjectURL(file); a.target = '_blank'
+        a.download = `${new Date().toISOString()}.rel.json`
+        a.click(); a.remove()
+    }
+
+    debug.load = debug.querySelector('.load')
+    debug.load.textarea = debug.load.querySelector('textarea')
+    debug.load.file = ({ target: { files: [file] }}) => {
+        const r = new FileReader()
+        r.onload = () => { debug.load.textarea.value = r.result, debug.load.load() }
+        r.readAsText(file)
+    }
+    debug.load.load = () => {
+        clearVectors()
+        loadVectors(JSON.parse(debug.load.textarea.value))
+    }
+    //}}}
+
+     
+    function loadVectors(list) {
+        tools.vectors.list.innerHTML = ''
+        list.forEach(v => { 
+            const vector = e.newVector(v) 
+            tools.vectors.list.push(vector)
+        })
+        e.reference = e.vectors?.[0]
+    }
+    function clearVectors() { tools.vectors.list.innerHTML = '', e.clearVectors() }
 
     speed = 1
+    var oldt = performance.now()
     function run(t) {
         const dt = (t - oldt) * speed
         oldt = t
-        e.vectors.forEach(v => Object.entries(v.label).forEach(([e, i]) => i.innerHTML = (typeof v[e] == 'function' ? v[e]() : v[e]).toFixed(2)))
+        e.vectors.forEach(v => Object.entries(v.label).forEach(([e, i]) => { 
+            const t = (typeof v[e] == 'function' ? v[e]() : v[e])
+            i.innerHTML = t ? Number.isInteger(t) ? t : (() => {
+                if (Math.abs(t) != 1 && Math.abs(+t.toFixed(3)) == 1) return t < 0 ? '> -1.000' : '< 1.000'
+                else return t.toFixed(3)
+            })() : 0
+        }))
         try { if (e.length >= e.reference.t) e.update(dt), e.draw() } catch { }
         requestAnimationFrame(run)
     }
-    var oldt = performance.now()
+
+    loadVectors([
+        { color: '#20cf17', x: t => Math.cos(t / 80) * 40 },
+        { color: '#cf3017', x: t => Math.cos(t / 80) * -40 },
+        { color: '#ff8800', x: t => -t },
+        { color: '#ff8800', x: t => t }
+    ])
+
     requestAnimationFrame(run)
 </script>

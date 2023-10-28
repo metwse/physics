@@ -21,6 +21,6 @@ canvas { max-width: calc(100vw - 1em); max-height: calc(100% - 1em); flex-shrink
 #tools.active { right: 0 }
 
 @media (min-width: 1400px) {
-    #debug, #tools { display: none; position: unset }
-    #debug.active, #tools.active { display: block }
+    #debug:not(.active), #tools:not(.active) { display: none; position: unset }
+    #debug, #tools { position: unset }
 }

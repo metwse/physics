@@ -2,7 +2,8 @@ const simulations = [
     ['Tork-Newton', '/simulations/torque-newton.html'],
     ['Tork Dağılımı - Başarısız', '/simulations/torque-distro.html'],
     ['Newton 1', '/simulations/physics-v1.html'],
-    ['Elektrik', '/simulations/electric.html']
+    ['Elektrik', '/simulations/electric.html'],
+    ['Özel Görelilik', '/simulations/special-relativity.html']
 ]
 
 
@@ -47,7 +48,7 @@ const app = {
     random: null,
 
     requestAnimationFrameFunction(random) {
-        return callback => { if (this.random == random) requestAnimationFrame(() => callback()) }
+        return callback => { if (this.random == random) requestAnimationFrame(callback) }
     },
 
     //TO DO:: history & reload (loadURL > this.last)
@@ -85,7 +86,7 @@ const app = {
             timeouter()
         })
         /* onload */ w2.canvas = w2.d.querySelector('canvas')
-        /* onload */ w2.ctx = w2.canvas.getContext('2d')
+        /* onload */ w2.c = w2.ctx = w2.canvas.getContext('2d')
 
         !['tools', 'debug'].forEach(v => { 
             let html = elem.querySelector(v)?.innerHTML ?? false

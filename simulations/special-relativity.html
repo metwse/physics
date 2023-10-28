@@ -1,0 +1,28 @@
+<script requirements>
+    Engine: '/simulations/scripts/special-relativity.js'
+</script>
+
+
+<script>
+    e = new Engine({ timeInterval: 20, length: 1600 })
+    function run(t) {
+        const dt = t - oldt
+        oldt = t
+        try { if (e.length >= e.reference.t) e.update(dt), e.draw() } catch { }
+        requestAnimationFrame(run)
+    }
+    var oldt = performance.now()
+    ![
+        { color: 'green', x: t => e.vectors[1].x(t) + Math.cos(t / 80) * 40 },
+        { color: 'red', x: t => -t / 3 },
+        { color: 'blue', x: t => 
+            t < 50 ? 0 : 
+            t < 350 ? (t - 50) ** 2 * (t - 350) ** 2 / 7000000 : 0
+        },
+        { color: 'transparent', x: t => 0 },
+        { color: 'orange', x: t => -t },
+        { color: 'orange', x: t => t }
+    ].forEach(v => e.newVector(v))
+    e.reference = e.vectors[0]
+    requestAnimationFrame(run)
+</script>

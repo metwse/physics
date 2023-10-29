@@ -92,12 +92,12 @@ class Engine {
         c.textAlign = 'left'
         c.textBaseline = 'middle'
         c.fillStyle = '#666'
-        c.fillText('x\'', ...this.rtransform(0, -80))
-        c.fillText('t\'', ...this.rtransform(80, 0))
+        c.fillText('x', ...this.rtransform(0, -80))
+        c.fillText('t', ...this.rtransform(80, 0))
         c.fillStyle = '#888'
         c.font = '10px arial'
-        c.fillText('x', 0, -80 * this.tscale)
-        c.fillText('t', 80 * this.tscale, 0)
+        c.fillText('x\'', 0, -80 * this.tscale)
+        c.fillText('t\'', 80 * this.tscale, 0)
         //}}}
 
 

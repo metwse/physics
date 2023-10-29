@@ -16,29 +16,42 @@ class Engine {
         this.timeInterval = timeInterval ?? 20
         this.length = length ?? s.x
         this.scale = scale ?? 1.5
+        this.c = 20 
+        this.c2 = this.c ** 2
     }
 
     newVector(o) {
-        const v = new Vector(o); v.id = this.vectors.push(v) - 1
-        this.onvectorupdate?.()
+        const v = new Vector(o)
+        v.id = this.vectors.push(v) - 1, v.e = this
+        this.updateVectors()
         return v
     }
     removeVector(v) {
         for (let i = 0; i < this.vectors.length; i++)
-            if (this.vectors[i] == v) { this.vectors.splice(i, 1)[0], this.onvectorupdate?.(); break }
+            if (this.vectors[i] == v) { this.vectors.splice(i, 1)[0], this.updateVectors(); break }
         for (let i = 0; i < this.vectors.length; i++) this.vectors[i].id = i 
     }
-    clearVectors() { this.vectors = [], this.reference = null, this.onvectorupdate?.() }
+    clearVectors() { this.vectors = [], this.reference = null, this.updateVectors() }
+    updateVectors() {
+        this.onvectorupdate?.()
+        const vectors = this.vectors.map(v => t => v.x(t) / this.c)
+        for (let v of this.vectors) v.vectors = vectors
+    }
     toString() { return `[${this.vectors.map(v => v.toString())}]` }
 
-    update(_dt) {
+    update(_dt, speed) {
         const dt = _dt / this.timeInterval
         for (let i = 0; i < this.vectors.length; i++) {
             const vector = this.vectors[i]
-            const v = (vector.v() - this.reference.v()) / (1 + this.reference.v() * vector.v())
-            const __dt = dt * Math.sqrt(1 + v ** 2)
-            vector.t += __dt
-            vector.ts += __dt / 1000 * this.timeInterval
+            const v = (vector.v() - this.reference.v()) / (1 + this.reference.v() * vector.v() / this.c2)
+            const __dt = (dt + (vector.x(this.reference.t) - this.reference.x(this.reference.t)) / this.c * v / this.c2) / Math.sqrt(1 - v ** 2 / this.c2) * speed
+            vector.__t = __dt
+            vector.__ts = __dt / 1000 * this.timeInterval
+        }
+        for (let i = 0; i < this.vectors.length; i++) {
+            const vector = this.vectors[i]
+            vector.t += vector.__t * speed
+            vector.ts += vector.__ts * speed
         }
     }
 
@@ -46,21 +59,17 @@ class Engine {
         c.reset()
         c.translate(s2.x + this.startX, s2.y)
         c.scale(this.scale, this.scale)
-        this.tscale = 1
-        const k = 1 / Math.sqrt(pythagoras(...this.rtransform(1, 1)) * pythagoras(...this.rtransform(1, -1)))
-        this.tscale = k
-        if (isNaN(this.tscale)) this.tscale = 1
 
         //{{{ relativistic grid 
         c.lineWidth = 1
         c.strokeStyle = '#343434'
         c.beginPath()
-        for (let i = -s2.y; i <= s2.y; i += 20) {
+        for (let i = -s2.y; i <= s2.y; i += this.c) {
             c.moveTo(...this.rtransform(s2.x - this.startX, i))
             c.lineTo(...this.rtransform(-s2.x - this.startX, i))
         }
 
-        for (let i = -s2.x; i <= s2.x; i += 20) {
+        for (let i = -s2.x; i <= s2.x; i += this.c) {
             c.moveTo(...this.rtransform(i - this.startX, s2.y))
             c.lineTo(...this.rtransform(i - this.startX, -s2.y))
         }
@@ -97,8 +106,8 @@ class Engine {
         c.fillText('t', ...this.rtransform(80, 0))
         c.fillStyle = '#888'
         c.font = '10px arial'
-        c.fillText('x\'', 0, -80 * this.tscale)
-        c.fillText('t\'', 80 * this.tscale, 0)
+        c.fillText('x\'', 0, -80)
+        c.fillText('t\'', 80, 0)
         //}}}
 
 
@@ -108,8 +117,8 @@ class Engine {
             c.beginPath()
             let less = true, dot = [], x, y
             for (let i = this.reference.t + this.startX - 100; i <= s.x + this.reference.t + this.startX + 10; i += 1 / 3) {
-                [x, y] = this.rtransform(i - this.reference.t, -vector.x(i) + this.reference.x())
-                if (!less && x < 0) less = true, dot.push(y)
+                [x, y] = this.rtransform(i - this.reference.t, (-vector.x(i) + this.reference.x()) / this.c)
+                if (!less && x < 0) less = true, dot.push(y / this.c)
                 if (less && x > 0) less = false, dot.push(y)
                 c.lineTo(x, y)
             }
@@ -124,27 +133,27 @@ class Engine {
                 c.textBaseline = 'bottom'
                 c.fillText(vector.id, 0, y - 3)
                 c.textBaseline = 'top'
-                c.fillText(vector.ts.toFixed(1) + 's', 0, y + 3)
+                c.fillText((isNaN(vector.ts) ? '0.0' : vector.ts.toFixed(1)) + 's', 0, y + 3)
             })
         }
     }
 
-    transform(x, t, v) { return [(x - t * v.v()) * v.y, (t - x * v.v()) * v.y] }
+    //transform(x, t, v) { return [(x - t * v.v()) * v.y, (t - x * v.v()) * v.y] }
 
-    ttransform(t, v) { return t * v.y }
-    tutransform(t, v) { return t / v.y }
-    rtransform(x, t) { return [(x - t * this.reference.v()) * this.reference.y * this.tscale, (t - x * this.reference.v()) * this.reference.y * this.tscale] }
+    rtransform(x, t) { return [(x - t * this.reference.v() / this.c) * this.reference.y, (t - x * this.reference.v() / this.c) * this.reference.y] }
 }
 
 class Vector {
-    constructor({ x, color }) {
+    constructor({ x, color }, e) {
         this.t = 0; this.ts = 0
         this.xFunction(x)
         this.color = color ?? '#FF0000'
+        this.e = e
     }
-    v(t, p) { const d = p ?? 1 / 8, v = (this.x((t ?? this.t) - d) - this.x((t ?? this.t) + d)) / (2 * d); return Math.abs(v) > 1 ? Math.sign(v) * 0.999 : v }
-    get y() { return 1 / Math.sqrt(1 - this.v() ** 2) }
-    xFunction(x) { var xf = eval(x); this.x = t => xf(t ?? this.t), this.xFuncionString = x.toString() }
+    v(t, p) { const d = p ?? 1 / 8, v = (this.x((t ?? this.t) - d) - this.x((t ?? this.t) + d)) / (2 * d); return Math.abs(v) > this.e.c ? Math.sign(v) * 0.999 : v }
+    vr(t) { return (this.v() - this.e.reference.v()) / (1 + this.v() * this.e.reference.v() / this.e.c) }
+    get y() { return 1 / Math.sqrt(1 - this.v() ** 2 / this.e.c2) }
+    xFunction(x) { var xf = eval(`(function (t) { ${x} })`); this.x = t => xf.bind(this)(t ?? this.t) * this.e.c, this.xFuncionString = x }
     toString() { return JSON.stringify({ x: this.xFuncionString, color: this.color }) }
 }
 

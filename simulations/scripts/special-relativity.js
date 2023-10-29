@@ -35,7 +35,9 @@ class Engine {
         const dt = _dt / this.timeInterval
         for (let i = 0; i < this.vectors.length; i++) {
             const vector = this.vectors[i]
-            const __dt = dt / vector.y * this.reference.y
+            const v = (vector.v() - this.reference.v()) / (1 + this.reference.v() * vector.v())
+            const __dt = dt * Math.sqrt(1 + v ** 2)
+            console.log(v)
             vector.t += __dt
             vector.ts += __dt / 1000 * this.timeInterval
         }
@@ -115,10 +117,16 @@ class Engine {
             if (!dot.length) dot = [y]
             c.stroke(); c.closePath()
 
-            c.beginPath()
-            dot.forEach(y => c.arc(0, y, 2, Math.PI, -Math.PI))
-            c.fill()
-            c.fillText(vector.id, 2, dot - 2)
+            c.textAlign = 'center'
+            dot.forEach(y => {
+                c.beginPath()
+                c.arc(0, y, 2, Math.PI, -Math.PI)
+                c.fill()
+                c.textBaseline = 'bottom'
+                c.fillText(vector.id, 0, y - 3)
+                c.textBaseline = 'top'
+                c.fillText(vector.ts.toFixed(1) + 's', 0, y + 3)
+            })
         }
     }
 

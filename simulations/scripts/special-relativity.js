@@ -37,7 +37,6 @@ class Engine {
             const vector = this.vectors[i]
             const v = (vector.v() - this.reference.v()) / (1 + this.reference.v() * vector.v())
             const __dt = dt * Math.sqrt(1 + v ** 2)
-            console.log(v)
             vector.t += __dt
             vector.ts += __dt / 1000 * this.timeInterval
         }

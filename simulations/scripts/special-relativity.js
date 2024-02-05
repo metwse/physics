@@ -40,18 +40,19 @@ class Engine {
     toString() { return `[${this.vectors.map(v => v.toString())}]` }
 
     update(_dt, speed) {
-        const dt = _dt / this.timeInterval
+        const dt = _dt / this.timeInterval * speed
         for (let i = 0; i < this.vectors.length; i++) {
             const vector = this.vectors[i]
-            const v = (vector.v() - this.reference.v()) / (1 + this.reference.v() * vector.v() / this.c2)
-            const __dt = (dt + (vector.x(this.reference.t) - this.reference.x(this.reference.t)) / this.c * v / this.c2) / Math.sqrt(1 - v ** 2 / this.c2) * speed
-            vector.__t = __dt
-            vector.__ts = __dt / 1000 * this.timeInterval
-        }
-        for (let i = 0; i < this.vectors.length; i++) {
-            const vector = this.vectors[i]
-            vector.t += vector.__t * speed
-            vector.ts += vector.__ts * speed
+            if (vector != this.reference) {
+                const v = Math.abs(vector.v() - this.reference.v()) / (1 + vector.v() * this.reference.v() / (this.c ** 2))
+                const __dt = dt / Math.sqrt(1 - (v ** 2) / (this.c ** 2))
+                vector.t += __dt
+                vector.ts += __dt / 1000 * this.timeInterval
+            }
+            else { 
+                vector.t += dt
+                vector.ts += dt / 1000 * this.timeInterval
+            }
         }
     }
 

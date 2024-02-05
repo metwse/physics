@@ -92,13 +92,13 @@
    demos = {
        'durgun cismin yörüngesinde': {
            vectors: [
-               { color: '#20cf17', x: 'return Math.cos(t / 80) * 40' },
+               { color: '#20cf17', x: 'return Math.cos(t / 80) * 30' },
                { color: '#cf3017', x: 'return 0' }
            ]
        },
        'ışık hızına yakın cismin yörüngesinde': {
            vectors: [
-               { color: '#20cf17', x: 'return this.vectors[1](t) + Math.cos(t / 80) * 40' },
+               { color: '#20cf17', x: 'return this.vectors[1](t) + Math.cos(t / 80) * 30' },
                { color: '#cf3017', x: 'return t / 4' }
            ]
        },
@@ -110,7 +110,7 @@
        },
        'ışık hızı': {
            vectors: [
-               { color: '#20cf17', x: 'return Math.cos(t / 80) * 40' },
+               { color: '#20cf17', x: 'return Math.cos(t / 80) * 30' },
                { x: 'return 0' },
                { color: '#ff8800', x: 'return -t' },
                { color: '#ff8800', x: 'return t' }
@@ -145,7 +145,7 @@
             update && (e.reference = e.vectors[0])
         }
         i.querySelector('.save').onclick = () => {
-            try { const f = eval(i.querySelector('textarea').value); f(1); v.xFunction(f) } 
+            try { const f = eval(`t => { ${i.querySelector('textarea').value} }`); f(1); v.xFunction(i.querySelector('textarea').value) } 
             catch (e) { alert(e) }
         }
         i.querySelector('.color').oninput = ({ target: { value } }) => v.color = value
@@ -249,8 +249,8 @@
     }
 
     loadVectors([
-        { color: '#20cf17', x: 'return Math.cos(t / 80) * 40' },
-        { color: '#cf3017', x: 'return Math.cos(t / 80) * -40' },
+        { color: '#20cf17', x: 'return Math.cos(t / 80) * 30' },
+        { color: '#cf3017', x: 'return Math.cos(t / 80) * -30' },
         { color: '#ff8800', x: 'return -t' },
         { color: '#ff8800', x: 'return t' }
     ])
